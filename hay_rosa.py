@@ -24,11 +24,15 @@ subject = "Hay rosa en la tienda de BQ"
 msg = "Hay rosa. Corre!!!!"
 
 def mandar_email():
-	servidor = smtplib.SMTP(SMTP_Server, SMTP_Port)
-	servidor.starttls()
-	servidor.login(SMTP_User, SMTP_Password)
-	servidor.sendmail(fromaddr, toaddrs, msg)
-	servidor.quit()
+	try:
+		servidor = smtplib.SMTP(SMTP_Server, SMTP_Port)
+		servidor.starttls()
+		servidor.login(SMTP_User, SMTP_Password)
+		servidor.sendmail(fromaddr, toaddrs, msg)
+	except as e:
+		print time.strftime("%a %H:%M:%S") + " error en el envío de email", e
+	else:
+		servidor.quit()
 
 def mandar_push():
 	p = Pushbullet(PUSH_APIKEY)
