@@ -1,11 +1,13 @@
 #!/bin/bash
 
 MES="$(date +%m)"
+ANO="$(date +%Y)"
 TIEMPOS_REALES=0
 ODOO_STRING=""
+USUARIO="acarreno"
 
 last_inci=""
-last_inci_tiempo=0
+last_tiempo=0
 
 # usage() { echo "Usage: $0 -m MONTH" }
 
@@ -39,16 +41,24 @@ else
     MES=$1
 fi
 
+if [ -z $2 ]; then
+    echo "Año no recibido. Usamos el actual $(date +%Y)"
+else
+    echo "Mes $2 recibido."
+    ANO=$2
+fi
+
 # Ultimo dia del mes
 ULTIMO_DIA="$(cal $MES 2019 | awk 'NF {DAYS = $NF}; END {print DAYS}')"
-for inci in $(mquery -C -B -p 24x7 -fu acarreno 01/$MES $ULTIMO_DIA/$MES); do
+for inci in $(mquery -C -B -p 24x7 -fu $USUARIO 01/$MES/$ANO $ULTIMO_DIA/$MES/$ANO); do
     TAM="$(echo -n $ODOO_STRING | wc -c)"
     if [ $TAM -eq 0 ]; then
         ODOO_STRING=$inci
     else
         ODOO_STRING="$ODOO_STRING, $inci"
     fi
-    for tiempo in $(mquery -C -v $inci | grep Nota | grep acarreno | awk '{print $12}'); do
+    for tiempo in $(mquery -C -v $inci | grep Nota | grep $USUARIO | awk '{print $12}'); do
+        # Solo mostramos si el tiempo es mayor que 0
         if [ $(echo "$tiempo == 0" | bc -l) -ne 1 ]; then
             TIEMPOS_REALES=$(echo -n $TIEMPOS_REALES+$tiempo)
             echo $inci: $tiempo
